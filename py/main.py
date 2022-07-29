@@ -1,12 +1,13 @@
+import streamlit as st
 import pandas as pd
+import json
 import yfinance as yf
 import altair as alt
-import streamlit as st
 
-st.title('米国株価可視化アプリ')
+st.title('BioRadish')
 
 st.sidebar.write('''
-# GAFA株価
+# 日経バイオ系企業株価
 こちらは株価可視化ツールです。以下のオプションから表示日数を指定できます。
 ''')
 
@@ -14,24 +15,22 @@ st.sidebar.write('''
 ## 表示日数選択
 ''')
 
-days = st.sidebar.slider('日数', 1, 1000, 500)
+days = st.sidebar.slider('日数', 1, 365, 170)
 
 st.write(f'''
-### 過去 **{days}日間** のGAFA株価
+### 過去 **{days}日間** の日経バイオ企業の株価
 ''')
 
 @st.cache
-def get_data(days, tickers):
+def getStockPrice(tickers_dict, days):
     df = pd.DataFrame()
-    for company in tickers.keys():
-        tkr = yf.Ticker(tickers[company])
-        hist = tkr.history(period=f'{days}d')
-        hist.index = hist.index.strftime('%d %B %Y')
-        hist = hist[['Close']]
-        hist.columns = [company]
-        hist = hist.T
-        hist.index.name = 'Name'
-        df = pd.concat([df, hist])
+    for k,v in tickers_dict.items():
+        stock = yf.Ticker(f'{k}.T').history(period=f'{days}d')
+        stock.index = stock.index.strftime('%d %B %Y')
+        stock = stock[['Close']].rename(columns={'Close': v[0]})
+        stock = stock.T
+        stock.index.name = 'Name'
+        df = pd.concat([df, stock])
     return df
 
 try: 
@@ -40,39 +39,35 @@ try:
     ''')
     ymin, ymax = st.sidebar.slider(
         '範囲を指定してください。',
-        0.0, 3500.0, (0.0, 3500.0)
+        0.0, 10000.0, (0.0, 10000.0)
     )
-
-    tickers = {
-        'apple': 'AAPL',
-        'facebook': 'FB',
-        'google': 'GOOGL',
-        'microsoft': 'MSFT',
-        'netflix': 'NFLX',
-        'amazon': 'AMZN'
-    }
-    df = get_data(days, tickers)
+    
+    #jsonの読み込み
+    json_path = '../json/ticker.json'
+    tickers_dict = json.load(open(json_path, 'r'))
+    tickers_dict.pop('4365')
+    df = getStockPrice(tickers_dict, days)
     companies = st.multiselect(
         '会社名を選択してください。',
         list(df.index),
-        ['google', 'amazon', 'facebook', 'apple']
+        ['カイオム・バイオサイエンス']
     )
 
     if not companies:
         st.error('少なくとも一社は選んでください。')
     else:
         data = df.loc[companies]
-        st.write('### 株価 (USD)', data.sort_index())
+        st.write('### 株価 (JPY)', data.sort_index())
         data = data.T.reset_index()
         data = pd.melt(data, id_vars=['Date']).rename(
-            columns={'value': 'Stock Prices(USD)'}
+            columns={'value': 'Stock Prices(JPY)'}
         )
         chart = (
             alt.Chart(data)
             .mark_line(opacity=0.8, clip=True)
             .encode(
                 x='Date:T',
-                y=alt.Y('Stock Prices(USD):Q', stack=None, scale=alt.Scale(domain=[ymin, ymax])),
+                y=alt.Y('Stock Prices(JPY):Q', stack=None, scale=alt.Scale(domain=[ymin, ymax])),
                 color='Name:N'
             )
         )
