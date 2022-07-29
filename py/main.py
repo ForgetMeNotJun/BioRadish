@@ -1,8 +1,10 @@
 import streamlit as st
+import pathlib
 import pandas as pd
 import json
 import yfinance as yf
 import altair as alt
+from pathlib import Path
 
 st.title('BioRadish')
 
@@ -44,7 +46,7 @@ try:
     )
     
     #jsonの読み込み
-    json_path = '../json/ticker.json'
+    json_path = Path('../json/ticker.json')
     tickers_dict = json.load(open(json_path, 'r'))
     tickers_dict.pop('4365')
     df = getStockPrice(tickers_dict, days)
