@@ -16,7 +16,7 @@ st.sidebar.write('''
 ## 表示日数選択
 ''')
 
-days = st.sidebar.slider('日数', 1, 365, 170)
+days = st.sidebar.slider('日数', 1, 50, 25)
 
 st.write(f'''
 ### 過去 **{days}日間** の日経バイオ企業の株価
