@@ -46,8 +46,7 @@ try:
     )
     
     #jsonの読み込み
-    json_path = Path('../json/ticker.json')
-    tickers_dict = json.load(open(json_path, 'r'))
+    tickers_dict = json.load(open(Path('../json/ticker.json').resolve(), 'r'))
     tickers_dict.pop('4365')
     df = getStockPrice(tickers_dict, days)
     companies = st.multiselect(
