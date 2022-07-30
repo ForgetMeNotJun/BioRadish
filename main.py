@@ -4,7 +4,6 @@ import pandas as pd
 import json
 import yfinance as yf
 import altair as alt
-from pathlib import Path
 
 st.title('BioRadish')
 
@@ -46,7 +45,7 @@ try:
     )
     
     #jsonの読み込み
-    tickers_dict = json.load(open('ticker.json').resolve(), 'r')
+    tickers_dict = json.load(open('ticker.json', 'r'))
     tickers_dict.pop('4365')
     df = getStockPrice(tickers_dict, days)
     companies = st.multiselect(
