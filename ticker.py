@@ -2,7 +2,7 @@ import pandas as pd
 import json
 import mojimoji
 
-tosho = pd.read_excel('../data/stock.xls')
+tosho = pd.read_excel('stock.xls')
 
 tosho = tosho.loc[
     (tosho['17業種区分'] == '医薬品 ')#|
@@ -26,7 +26,7 @@ tosho['market'] = tosho['market'].apply(mojimoji.zen_to_han,kana=False, digit=Tr
 tosho['list'] = tosho[['company', 'market']].values.tolist()
 ticker_dict = dict(tosho[['ticker', 'list']].values)
 
-json_path = '../json/ticker.json'
+json_path = 'ticker.json'
 json_file = open(json_path, mode='w')
 
 json.dump(ticker_dict, json_file, indent=2, ensure_ascii=False)
